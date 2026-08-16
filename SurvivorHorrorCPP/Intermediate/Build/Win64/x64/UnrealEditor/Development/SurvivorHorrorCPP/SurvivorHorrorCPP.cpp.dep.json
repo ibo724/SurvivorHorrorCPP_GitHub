@@ -1,0 +1,14 @@
+{
+    "Version": "1.2",
+    "Data": {
+        "Source": "c:\\unrealprojects\\survivorhorrorcpp_github\\survivorhorrorcpp\\source\\survivorhorrorcpp\\survivorhorrorcpp.cpp",
+        "ProvidedModule": "",
+        "PCH": "c:\\unrealprojects\\survivorhorrorcpp_github\\survivorhorrorcpp\\intermediate\\build\\win64\\x64\\survivorhorrorcppeditor\\development\\unrealed\\sharedpch.unrealed.project.valapi.valexpapi.cpp20.h.pch",
+        "Includes": [
+            "c:\\unrealprojects\\survivorhorrorcpp_github\\survivorhorrorcpp\\intermediate\\build\\win64\\x64\\unrealeditor\\development\\survivorhorrorcpp\\definitions.survivorhorrorcpp.h",
+            "c:\\unrealprojects\\survivorhorrorcpp_github\\survivorhorrorcpp\\source\\survivorhorrorcpp\\survivorhorrorcpp.h"
+        ],
+        "ImportedModules": [],
+        "ImportedHeaderUnits": []
+    }
+}

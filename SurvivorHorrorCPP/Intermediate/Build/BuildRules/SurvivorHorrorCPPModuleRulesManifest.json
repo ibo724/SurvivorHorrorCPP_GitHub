@@ -1,0 +1,8 @@
+{
+	"SourceFiles": [
+		"C:\\UnrealProjects\\SurvivorHorrorCPP_GitHub\\SurvivorHorrorCPP\\Source\\SurvivorHorrorCPP\\SurvivorHorrorCPP.Build.cs",
+		"C:\\UnrealProjects\\SurvivorHorrorCPP_GitHub\\SurvivorHorrorCPP\\Source\\SurvivorHorrorCPP.Target.cs",
+		"C:\\UnrealProjects\\SurvivorHorrorCPP_GitHub\\SurvivorHorrorCPP\\Source\\SurvivorHorrorCPPEditor.Target.cs"
+	],
+	"EngineVersion": "5.6.1"
+}

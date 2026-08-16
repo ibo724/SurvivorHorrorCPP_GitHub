@@ -1,0 +1,14 @@
+{
+	"Targets": [
+		{
+			"Name": "SurvivorHorrorCPP",
+			"Path": "..\\Source\\SurvivorHorrorCPP.Target.cs",
+			"Type": "Game"
+		},
+		{
+			"Name": "SurvivorHorrorCPPEditor",
+			"Path": "..\\Source\\SurvivorHorrorCPPEditor.Target.cs",
+			"Type": "Editor"
+		}
+	]
+}

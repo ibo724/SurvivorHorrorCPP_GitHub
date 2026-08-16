@@ -1,0 +1,13 @@
+/NOLOGO
+/errorReport:prompt
+/MACHINE:x64
+/SUBSYSTEM:WINDOWS
+/DEF
+/NAME:"UnrealEditor-SurvivorHorrorCPP.dll"
+/IGNORE:4221
+/NODEFAULTLIB
+"C:/UnrealProjects/SurvivorHorrorCPP_GitHub/SurvivorHorrorCPP/Intermediate/Build/Win64/x64/SurvivorHorrorCPPEditor/Development/UnrealEd/SharedPCH.UnrealEd.Project.ValApi.ValExpApi.Cpp20.h.obj"
+"C:/UnrealProjects/SurvivorHorrorCPP_GitHub/SurvivorHorrorCPP/Intermediate/Build/Win64/x64/UnrealEditor/Development/SurvivorHorrorCPP/SurvivorHorrorCPP.cpp.obj"
+"C:/UnrealProjects/SurvivorHorrorCPP_GitHub/SurvivorHorrorCPP/Intermediate/Build/Win64/x64/UnrealEditor/Development/SurvivorHorrorCPP/PerModuleInline.gen.cpp.obj"
+"C:/UnrealProjects/SurvivorHorrorCPP_GitHub/SurvivorHorrorCPP/Intermediate/Build/Win64/x64/UnrealEditor/Development/SurvivorHorrorCPP/Default.rc2.res"
+/OUT:"C:/UnrealProjects/SurvivorHorrorCPP_GitHub/SurvivorHorrorCPP/Intermediate/Build/Win64/x64/UnrealEditor/Development/SurvivorHorrorCPP/UnrealEditor-SurvivorHorrorCPP.lib"
