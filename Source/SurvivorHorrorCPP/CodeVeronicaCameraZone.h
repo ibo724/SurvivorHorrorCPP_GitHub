@@ -50,7 +50,8 @@ private:
 		bool bFromSweep,
 		const FHitResult& SweepResult);
 
-	void TryActivateForPawn(APawn* PlayerPawn);
+	bool TryActivateForPawn(APawn* PlayerPawn);
+	void CheckForInitialPlayerOverlap();
 	void UpdateCameraTransform(float DeltaSeconds, bool bSnapImmediately);
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera Zone|Components", meta = (AllowPrivateAccess = "true"))
@@ -89,4 +90,9 @@ private:
 
 	UPROPERTY(Transient)
 	TObjectPtr<APawn> TrackedPawn;
+
+	/** Handles the case where the pawn spawns inside this volume before possession finishes. */
+	FTimerHandle InitialOverlapCheckTimer;
+
+	int32 RemainingInitialOverlapChecks = 0;
 };

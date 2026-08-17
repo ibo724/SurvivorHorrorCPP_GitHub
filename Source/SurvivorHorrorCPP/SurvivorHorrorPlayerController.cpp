@@ -20,6 +20,13 @@ void ASurvivorHorrorPlayerController::ActivateCameraZone(
 	ActiveCameraZone = NewCameraZone;
 	ActiveCameraZone->StartTracking(PlayerPawn);
 
+	UE_LOG(
+		LogTemp,
+		Log,
+		TEXT("Activated room camera '%s' for pawn '%s'."),
+		*GetNameSafe(ActiveCameraZone),
+		*GetNameSafe(PlayerPawn));
+
 	SetViewTargetWithBlend(
 		ActiveCameraZone,
 		ActiveCameraZone->GetCameraTransitionTime(),

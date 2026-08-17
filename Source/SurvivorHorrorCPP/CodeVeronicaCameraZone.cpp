@@ -9,6 +9,7 @@
 #include "GameFramework/Pawn.h"
 #include "GameFramework/PlayerController.h"
 #include "SurvivorHorrorPlayerController.h"
+#include "TimerManager.h"
 
 ACodeVeronicaCameraZone::ACodeVeronicaCameraZone()
 {
@@ -52,16 +53,40 @@ void ACodeVeronicaCameraZone::BeginPlay()
 	TriggerVolume->OnComponentBeginOverlap.AddDynamic(
 		this, &ACodeVeronicaCameraZone::HandleTriggerBeginOverlap);
 
-	// Begin-overlap normally handles this. The explicit query also covers a
-	// Player Start that was placed inside the volume before play begins.
+	// A pawn can already overlap the volume before its PlayerController has
+	// finished possessing it. Retry briefly at startup so that placing the
+	// Player Start inside the zone is reliable and does not fall back to the
+	// pawn's temporary first-person view.
+	RemainingInitialOverlapChecks = 20;
+	GetWorldTimerManager().SetTimer(
+		InitialOverlapCheckTimer,
+		this,
+		&ACodeVeronicaCameraZone::CheckForInitialPlayerOverlap,
+		0.1f,
+		true,
+		0.0f);
+}
+
+void ACodeVeronicaCameraZone::CheckForInitialPlayerOverlap()
+{
 	TArray<AActor*> OverlappingPawns;
 	TriggerVolume->GetOverlappingActors(OverlappingPawns, APawn::StaticClass());
 	for (AActor* OverlappingActor : OverlappingPawns)
 	{
 		if (APawn* PlayerPawn = Cast<APawn>(OverlappingActor))
 		{
-			TryActivateForPawn(PlayerPawn);
+			if (TryActivateForPawn(PlayerPawn))
+			{
+				GetWorldTimerManager().ClearTimer(InitialOverlapCheckTimer);
+				return;
+			}
 		}
+	}
+
+	--RemainingInitialOverlapChecks;
+	if (RemainingInitialOverlapChecks <= 0)
+	{
+		GetWorldTimerManager().ClearTimer(InitialOverlapCheckTimer);
 	}
 }
 
@@ -123,18 +148,18 @@ void ACodeVeronicaCameraZone::HandleTriggerBeginOverlap(
 	TryActivateForPawn(Cast<APawn>(OtherActor));
 }
 
-void ACodeVeronicaCameraZone::TryActivateForPawn(APawn* PlayerPawn)
+bool ACodeVeronicaCameraZone::TryActivateForPawn(APawn* PlayerPawn)
 {
 	if (!IsValid(PlayerPawn) || !PlayerPawn->IsPlayerControlled())
 	{
-		return;
+		return false;
 	}
 
 	if (ASurvivorHorrorPlayerController* PlayerController =
 		Cast<ASurvivorHorrorPlayerController>(PlayerPawn->GetController()))
 	{
 		PlayerController->ActivateCameraZone(this, PlayerPawn);
-		return;
+		return true;
 	}
 
 	// Safe fallback if a test level overrides the project's PlayerController.
@@ -143,7 +168,10 @@ void ACodeVeronicaCameraZone::TryActivateForPawn(APawn* PlayerPawn)
 		StartTracking(PlayerPawn);
 		PlayerController->SetViewTargetWithBlend(
 			this, CameraTransitionTime, VTBlend_Cubic, 2.0f, true);
+		return true;
 	}
+
+	return false;
 }
 
 void ACodeVeronicaCameraZone::UpdateCameraTransform(

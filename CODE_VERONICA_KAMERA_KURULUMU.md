@@ -25,6 +25,11 @@ Her `CodeVeronicaCameraZone` aktörü üç temel parçadan oluşur:
 8. `Play` düğmesine basın. Karakter ray doğrultusunda ilerledikçe kamera da ray
    üzerinde kaymalı ve karakteri kadrajda tutmalıdır.
 
+Oyun birinci şahıs görünümünde başlarsa `Player Start` aktörünün tamamının
+`TriggerVolume` kutusu içinde kaldığını kontrol edin. `World Settings > GameMode
+Override` değeri `None` veya `SurvivorHorrorGameMode` olmalıdır. `Simulate`
+yerine normal `Play` kullanın.
+
 ## Başlangıç ayarları
 
 Aktörü seçtiğinizde `Camera Zone` kategorisinde şu değerleri göreceksiniz:
