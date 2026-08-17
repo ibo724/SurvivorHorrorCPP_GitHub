@@ -44,6 +44,7 @@ private:
 	void NavigateInventoryRight();
 	void ConfirmInventoryMove();
 	void InspectSelectedItem();
+	void DiscardSelectedObsoleteItem();
 	void SetInventoryOpen(bool bNewOpen);
 
 	UPROPERTY(Transient)

@@ -358,15 +358,34 @@ void ASurvivorHorrorHUD::DrawInventoryScreen(
 				: TEXT("[F] Eşyayı incele — gözden kaçan bir ayrıntı olabilir.");
 			InspectionColor = FLinearColor(0.62f, 0.68f, 0.66f);
 		}
+
+		if (bInspected
+			&& !Item->MatchingLockSymbol.IsNone()
+			&& Inventory->HasObservedLockSymbol(Item->MatchingLockSymbol))
+		{
+			const FString SymbolName = Item->LockSymbolDisplayName.IsEmpty()
+				? Item->MatchingLockSymbol.ToString()
+				: Item->LockSymbolDisplayName.ToString();
+			InspectionText += FString::Printf(
+				TEXT(" HAFIZA BAĞLANTISI: %s işareti kilitli bir kapıda görülmüştü."),
+				*SymbolName);
+			InspectionColor = FLinearColor(0.42f, 0.78f, 0.88f);
+		}
+
+		if (Inventory->IsItemObsolete(Item))
+		{
+			InspectionText = TEXT("[R] ARTIK GEREKMİYOR — çantadan çıkar. ") + InspectionText;
+			InspectionColor = FLinearColor(0.96f, 0.65f, 0.24f);
+		}
 		DrawWrappedText(
 			InspectionText,
 			DetailX + 18.0f * UIScale,
-			DetailY + 131.0f * UIScale,
+			DetailY + 124.0f * UIScale,
 			GridWidth - 36.0f * UIScale,
 			Font,
 			InspectionColor,
-			0.70f * UIScale,
-			2);
+			0.67f * UIScale,
+			3);
 	}
 
 	if (SurvivorController->GetMoveSourceSlot() != INDEX_NONE)
@@ -382,7 +401,7 @@ void ASurvivorHorrorHUD::DrawInventoryScreen(
 	}
 
 	DrawCenteredTextInArea(
-		TEXT("WASD / Oklar: Gezin   E: Taşı / Yerleştir   F: İncele   I / Tab / Esc: Kapat"),
+		TEXT("WASD / Oklar: Gezin   E: Taşı   F: İncele   R: Gereksiz anahtarı at   I / Tab: Kapat"),
 		0.0f,
 		Canvas->ClipY - 38.0f * UIScale,
 		Canvas->ClipX,

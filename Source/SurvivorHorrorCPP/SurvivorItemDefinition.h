@@ -57,6 +57,14 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item|Bag Noise")
 	ESurvivorItemNoiseClass NoiseClass = ESurvivorItemNoiseClass::Silent;
 
+	/** Internal symbol shared with matching locked doors. Leave empty for non-keys. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item|Key")
+	FName MatchingLockSymbol = NAME_None;
+
+	/** Player-facing symbol name, such as Moon, Serpent or Tower. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item|Key")
+	FText LockSymbolDisplayName;
+
 	/** How many copies fit in one stack. Use 1 for unique items and keys. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item", meta = (ClampMin = "1", UIMin = "1"))
 	int32 MaxStackSize = 1;

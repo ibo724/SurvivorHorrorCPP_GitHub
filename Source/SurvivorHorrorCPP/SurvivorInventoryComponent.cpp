@@ -240,6 +240,64 @@ bool USurvivorInventoryComponent::IsItemInspected(
 	return !MemoryKey.IsNone() && InspectedItemIds.Contains(MemoryKey);
 }
 
+bool USurvivorInventoryComponent::RememberLockSymbol(const FName LockSymbol)
+{
+	if (LockSymbol.IsNone() || ObservedLockSymbols.Contains(LockSymbol))
+	{
+		return false;
+	}
+
+	ObservedLockSymbols.Add(LockSymbol);
+	OnInventoryChanged.Broadcast();
+	return true;
+}
+
+bool USurvivorInventoryComponent::HasObservedLockSymbol(const FName LockSymbol) const
+{
+	return !LockSymbol.IsNone() && ObservedLockSymbols.Contains(LockSymbol);
+}
+
+bool USurvivorInventoryComponent::MarkItemObsolete(
+	const USurvivorItemDefinition* ItemDefinition)
+{
+	const FName MemoryKey = GetInspectionMemoryKey(ItemDefinition);
+	if (MemoryKey.IsNone() || ObsoleteItemIds.Contains(MemoryKey))
+	{
+		return false;
+	}
+
+	ObsoleteItemIds.Add(MemoryKey);
+	OnInventoryChanged.Broadcast();
+	return true;
+}
+
+bool USurvivorInventoryComponent::IsItemObsolete(
+	const USurvivorItemDefinition* ItemDefinition) const
+{
+	const FName MemoryKey = GetInspectionMemoryKey(ItemDefinition);
+	return !MemoryKey.IsNone() && ObsoleteItemIds.Contains(MemoryKey);
+}
+
+int32 USurvivorInventoryComponent::DiscardObsoleteItemAtSlot(const int32 SlotIndex)
+{
+	if (!Entries.IsValidIndex(SlotIndex)
+		|| !IsValid(Entries[SlotIndex].ItemDefinition)
+		|| !IsItemObsolete(Entries[SlotIndex].ItemDefinition))
+	{
+		return 0;
+	}
+
+	USurvivorItemDefinition* ItemDefinition = Entries[SlotIndex].ItemDefinition;
+	const int32 DiscardedQuantity = Entries[SlotIndex].Quantity;
+	Entries[SlotIndex] = FSurvivorInventoryEntry();
+	if (GetItemQuantity(ItemDefinition) <= 0)
+	{
+		ObsoleteItemIds.Remove(GetInspectionMemoryKey(ItemDefinition));
+	}
+	OnInventoryChanged.Broadcast();
+	return DiscardedQuantity;
+}
+
 int32 USurvivorInventoryComponent::GetBagNoiseScore() const
 {
 	int32 Score = 0;

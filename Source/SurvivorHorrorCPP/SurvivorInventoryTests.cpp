@@ -28,6 +28,7 @@ bool FSurvivorInventoryCapacityTest::RunTest(const FString& Parameters)
 	MetalItem->ItemId = TEXT("automation_metal_item");
 	MetalItem->MaxStackSize = 1;
 	MetalItem->NoiseClass = ESurvivorItemNoiseClass::Metallic;
+	MetalItem->MatchingLockSymbol = TEXT("automation_moon");
 
 	USurvivorInventoryComponent* NoiseInventory =
 		NewObject<USurvivorInventoryComponent>();
@@ -40,6 +41,16 @@ bool FSurvivorInventoryCapacityTest::RunTest(const FString& Parameters)
 	TestTrue(TEXT("First inspection creates a memory"), NoiseInventory->InspectItemAtSlot(0));
 	TestTrue(TEXT("Inspection memory is retained"), NoiseInventory->IsItemInspected(MetalItem));
 	TestFalse(TEXT("Repeated inspection does not create a second memory"), NoiseInventory->InspectItemAtSlot(0));
+	TestTrue(TEXT("First door symbol observation is remembered"), NoiseInventory->RememberLockSymbol(TEXT("automation_moon")));
+	TestTrue(TEXT("Observed door symbol can be queried"), NoiseInventory->HasObservedLockSymbol(TEXT("automation_moon")));
+	TestFalse(TEXT("Door symbol memory is not duplicated"), NoiseInventory->RememberLockSymbol(TEXT("automation_moon")));
+
+	TestTrue(TEXT("Last lock can mark a key obsolete"), NoiseInventory->MarkItemObsolete(MetalItem));
+	TestTrue(TEXT("Obsolete state can be queried"), NoiseInventory->IsItemObsolete(MetalItem));
+	TestEqual(TEXT("Player can discard one obsolete stack"), NoiseInventory->DiscardObsoleteItemAtSlot(0), 1);
+	TestTrue(TEXT("Obsolete state remains while another copy exists"), NoiseInventory->IsItemObsolete(MetalItem));
+	TestEqual(TEXT("Player can discard the final obsolete stack"), NoiseInventory->DiscardObsoleteItemAtSlot(7), 1);
+	TestFalse(TEXT("Obsolete state clears after final copy is gone"), NoiseInventory->IsItemObsolete(MetalItem));
 
 	return true;
 }

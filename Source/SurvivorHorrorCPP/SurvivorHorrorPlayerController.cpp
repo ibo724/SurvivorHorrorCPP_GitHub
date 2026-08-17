@@ -60,6 +60,12 @@ void ASurvivorHorrorPlayerController::SetupInputComponent()
 		&ASurvivorHorrorPlayerController::InspectSelectedItem);
 	InspectBinding.bExecuteWhenPaused = true;
 	InspectBinding.bConsumeInput = false;
+
+	FInputActionBinding& DiscardBinding = InputComponent->BindAction(
+		TEXT("InventoryDiscard"), IE_Pressed, this,
+		&ASurvivorHorrorPlayerController::DiscardSelectedObsoleteItem);
+	DiscardBinding.bExecuteWhenPaused = true;
+	DiscardBinding.bConsumeInput = false;
 }
 
 USurvivorInventoryComponent* ASurvivorHorrorPlayerController::GetPlayerInventory() const
@@ -203,6 +209,25 @@ void ASurvivorHorrorPlayerController::InspectSelectedItem()
 			Log,
 			TEXT("Inspection memory unlocked for item '%s'."),
 			*Entry.ItemDefinition->GetName());
+	}
+}
+
+void ASurvivorHorrorPlayerController::DiscardSelectedObsoleteItem()
+{
+	USurvivorInventoryComponent* Inventory = GetPlayerInventory();
+	if (!bInventoryOpen || !IsValid(Inventory))
+	{
+		return;
+	}
+
+	const FSurvivorInventoryEntry Entry = Inventory->GetEntryAt(SelectedInventorySlot);
+	if (Inventory->DiscardObsoleteItemAtSlot(SelectedInventorySlot) > 0)
+	{
+		UE_LOG(
+			LogTemp,
+			Log,
+			TEXT("Obsolete item discarded: '%s'."),
+			*GetNameSafe(Entry.ItemDefinition));
 	}
 }
 

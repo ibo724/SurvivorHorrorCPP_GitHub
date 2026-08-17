@@ -90,6 +90,24 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Inventory|Inspection")
 	bool IsItemInspected(const USurvivorItemDefinition* ItemDefinition) const;
 
+	/** Records a symbol found on a locked door. */
+	UFUNCTION(BlueprintCallable, Category = "Inventory|Inspection")
+	bool RememberLockSymbol(FName LockSymbol);
+
+	UFUNCTION(BlueprintPure, Category = "Inventory|Inspection")
+	bool HasObservedLockSymbol(FName LockSymbol) const;
+
+	/** Marks an item type as no longer needed without discarding it automatically. */
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
+	bool MarkItemObsolete(const USurvivorItemDefinition* ItemDefinition);
+
+	UFUNCTION(BlueprintPure, Category = "Inventory")
+	bool IsItemObsolete(const USurvivorItemDefinition* ItemDefinition) const;
+
+	/** Discards the selected stack only if its item type has become obsolete. */
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
+	int32 DiscardObsoleteItemAtSlot(int32 SlotIndex);
+
 	UFUNCTION(BlueprintPure, Category = "Inventory|Bag Noise")
 	int32 GetBagNoiseScore() const;
 
@@ -116,4 +134,10 @@ private:
 	/** Session memory; this will be serialized when the save-game system is added. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "Inventory|Inspection", meta = (AllowPrivateAccess = "true"))
 	TSet<FName> InspectedItemIds;
+
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "Inventory|Inspection", meta = (AllowPrivateAccess = "true"))
+	TSet<FName> ObservedLockSymbols;
+
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "Inventory", meta = (AllowPrivateAccess = "true"))
+	TSet<FName> ObsoleteItemIds;
 };
