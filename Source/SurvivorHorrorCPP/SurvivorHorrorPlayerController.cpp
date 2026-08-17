@@ -17,41 +17,49 @@ void ASurvivorHorrorPlayerController::SetupInputComponent()
 		TEXT("InventoryToggle"), IE_Pressed, this,
 		&ASurvivorHorrorPlayerController::ToggleInventory);
 	ToggleBinding.bExecuteWhenPaused = true;
+	ToggleBinding.bConsumeInput = false;
 
 	FInputActionBinding& CancelBinding = InputComponent->BindAction(
 		TEXT("InventoryCancel"), IE_Pressed, this,
 		&ASurvivorHorrorPlayerController::CloseInventoryOrCancelMove);
 	CancelBinding.bExecuteWhenPaused = true;
+	CancelBinding.bConsumeInput = false;
 
 	FInputActionBinding& UpBinding = InputComponent->BindAction(
 		TEXT("InventoryUp"), IE_Pressed, this,
 		&ASurvivorHorrorPlayerController::NavigateInventoryUp);
 	UpBinding.bExecuteWhenPaused = true;
+	UpBinding.bConsumeInput = false;
 
 	FInputActionBinding& DownBinding = InputComponent->BindAction(
 		TEXT("InventoryDown"), IE_Pressed, this,
 		&ASurvivorHorrorPlayerController::NavigateInventoryDown);
 	DownBinding.bExecuteWhenPaused = true;
+	DownBinding.bConsumeInput = false;
 
 	FInputActionBinding& LeftBinding = InputComponent->BindAction(
 		TEXT("InventoryLeft"), IE_Pressed, this,
 		&ASurvivorHorrorPlayerController::NavigateInventoryLeft);
 	LeftBinding.bExecuteWhenPaused = true;
+	LeftBinding.bConsumeInput = false;
 
 	FInputActionBinding& RightBinding = InputComponent->BindAction(
 		TEXT("InventoryRight"), IE_Pressed, this,
 		&ASurvivorHorrorPlayerController::NavigateInventoryRight);
 	RightBinding.bExecuteWhenPaused = true;
+	RightBinding.bConsumeInput = false;
 
 	FInputActionBinding& ConfirmBinding = InputComponent->BindAction(
 		TEXT("InventoryConfirm"), IE_Pressed, this,
 		&ASurvivorHorrorPlayerController::ConfirmInventoryMove);
 	ConfirmBinding.bExecuteWhenPaused = true;
+	ConfirmBinding.bConsumeInput = false;
 
 	FInputActionBinding& InspectBinding = InputComponent->BindAction(
 		TEXT("InventoryInspect"), IE_Pressed, this,
 		&ASurvivorHorrorPlayerController::InspectSelectedItem);
 	InspectBinding.bExecuteWhenPaused = true;
+	InspectBinding.bConsumeInput = false;
 }
 
 USurvivorInventoryComponent* ASurvivorHorrorPlayerController::GetPlayerInventory() const
