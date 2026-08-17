@@ -36,6 +36,7 @@ private:
 	void Interact();
 	void StartRunning();
 	void StopRunning();
+	void PerformQuickTurn();
 
 	/** Character-facing interaction detection; independent of the room camera. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Interaction", meta = (AllowPrivateAccess = "true"))
@@ -65,5 +66,11 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Tank Controls|Movement", meta = (AllowPrivateAccess = "true", ClampMin = "0.0", Units = "deg/s"))
 	float TurnRate = 95.0f;
 
+	/** Snap rotation used by Run + Backward. Animation will be added with the real character. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Tank Controls|Movement", meta = (AllowPrivateAccess = "true", ClampMin = "0.0", ClampMax = "360.0", Units = "deg"))
+	float QuickTurnAngle = 180.0f;
+
 	bool bRunInputHeld = false;
+	bool bQuickTurnLatched = false;
+	float LastMoveAxisValue = 0.0f;
 };

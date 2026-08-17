@@ -6,6 +6,7 @@
 #include "Components/InputComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Engine/StaticMesh.h"
+#include "Engine/World.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
 #include "SurvivorInventoryComponent.h"
@@ -79,10 +80,23 @@ void AClassicTankCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
 
 void AClassicTankCharacter::MoveForward(const float AxisValue)
 {
+	LastMoveAxisValue = AxisValue;
 	if (FMath::IsNearlyZero(AxisValue))
 	{
+		bQuickTurnLatched = false;
 		return;
 	}
+
+	if (AxisValue < 0.0f && bRunInputHeld)
+	{
+		if (!bQuickTurnLatched)
+		{
+			PerformQuickTurn();
+			bQuickTurnLatched = true;
+		}
+		return;
+	}
+	bQuickTurnLatched = false;
 
 	UCharacterMovementComponent* Movement = GetCharacterMovement();
 	Movement->MaxWalkSpeed = bRunInputHeld && AxisValue > 0.0f
@@ -122,10 +136,30 @@ void AClassicTankCharacter::Interact()
 void AClassicTankCharacter::StartRunning()
 {
 	bRunInputHeld = true;
+	if (LastMoveAxisValue < 0.0f
+		&& !bQuickTurnLatched
+		&& GetWorld()
+		&& !GetWorld()->IsPaused())
+	{
+		PerformQuickTurn();
+		bQuickTurnLatched = true;
+	}
 }
 
 void AClassicTankCharacter::StopRunning()
 {
 	bRunInputHeld = false;
+	bQuickTurnLatched = false;
 	GetCharacterMovement()->MaxWalkSpeed = ForwardSpeed;
+}
+
+void AClassicTankCharacter::PerformQuickTurn()
+{
+	GetCharacterMovement()->StopMovementImmediately();
+	AddActorLocalRotation(FRotator(0.0f, QuickTurnAngle, 0.0f));
+
+	if (Controller)
+	{
+		Controller->SetControlRotation(GetActorRotation());
+	}
 }
