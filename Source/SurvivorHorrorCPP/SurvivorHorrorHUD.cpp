@@ -8,6 +8,7 @@
 #include "Engine/World.h"
 #include "GameFramework/PlayerController.h"
 #include "SurvivorHorrorPlayerController.h"
+#include "SurvivorHealthComponent.h"
 #include "SurvivorInteractionComponent.h"
 #include "SurvivorInventoryComponent.h"
 #include "SurvivorItemDefinition.h"
@@ -92,6 +93,16 @@ void ASurvivorHorrorHUD::DrawHUD()
 
 	const ASurvivorHorrorPlayerController* SurvivorController =
 		Cast<ASurvivorHorrorPlayerController>(PlayerOwner);
+	APawn* PlayerPawn = PlayerOwner->GetPawn();
+	const USurvivorHealthComponent* Health = IsValid(PlayerPawn)
+		? PlayerPawn->FindComponentByClass<USurvivorHealthComponent>()
+		: nullptr;
+	if (IsValid(Health) && Health->IsDead())
+	{
+		DrawDeathScreen(PromptFont);
+		return;
+	}
+
 	const USurvivorInventoryComponent* Inventory = IsValid(SurvivorController)
 		? SurvivorController->GetPlayerInventory()
 		: nullptr;
@@ -100,6 +111,11 @@ void ASurvivorHorrorHUD::DrawHUD()
 	{
 		DrawInventoryScreen(SurvivorController, Inventory, PromptFont);
 		return;
+	}
+
+	if (IsValid(Health))
+	{
+		DrawHealthStatus(Health, PromptFont);
 	}
 
 	if (!NotificationText.IsEmpty() && GetWorld()
@@ -119,7 +135,6 @@ void ASurvivorHorrorHUD::DrawHUD()
 			false);
 	}
 
-	APawn* PlayerPawn = PlayerOwner->GetPawn();
 	USurvivorInteractionComponent* InteractionComponent = IsValid(PlayerPawn)
 		? PlayerPawn->FindComponentByClass<USurvivorInteractionComponent>()
 		: nullptr;
@@ -149,6 +164,56 @@ void ASurvivorHorrorHUD::DrawHUD()
 		TextWidth + Padding * 2.0f,
 		TextHeight + Padding);
 	DrawText(PromptString, FLinearColor::White, TextX, TextY, PromptFont, 1.0f, false);
+}
+
+void ASurvivorHorrorHUD::DrawHealthStatus(
+	const USurvivorHealthComponent* Health,
+	UFont* Font)
+{
+	FString StatusText = TEXT("DURUM: İYİ");
+	FLinearColor StatusColor(0.26f, 0.80f, 0.36f);
+	switch (Health->GetHealthState())
+	{
+	case ESurvivorHealthState::Warning:
+		StatusText = TEXT("DURUM: DİKKAT");
+		StatusColor = FLinearColor(1.0f, 0.68f, 0.16f);
+		break;
+	case ESurvivorHealthState::Danger:
+		StatusText = TEXT("DURUM: TEHLİKE");
+		StatusColor = FLinearColor(0.95f, 0.10f, 0.06f);
+		break;
+	default:
+		break;
+	}
+
+	constexpr float X = 24.0f;
+	constexpr float Y = 24.0f;
+	constexpr float Width = 190.0f;
+	constexpr float Height = 42.0f;
+	DrawRect(FLinearColor(0.0f, 0.0f, 0.0f, 0.68f), X, Y, Width, Height);
+	DrawBorder(X, Y, Width, Height, 2.0f, StatusColor);
+	DrawText(StatusText, StatusColor, X + 13.0f, Y + 9.0f, Font, 0.82f, false);
+}
+
+void ASurvivorHorrorHUD::DrawDeathScreen(UFont* Font)
+{
+	DrawRect(FLinearColor(0.015f, 0.0f, 0.0f, 0.90f), 0.0f, 0.0f, Canvas->ClipX, Canvas->ClipY);
+	DrawCenteredTextInArea(
+		TEXT("ÖLDÜN"),
+		0.0f,
+		Canvas->ClipY * 0.38f,
+		Canvas->ClipX,
+		Font,
+		FLinearColor(0.72f, 0.04f, 0.03f),
+		2.0f);
+	DrawCenteredTextInArea(
+		TEXT("[R / ENTER] Tekrar dene"),
+		0.0f,
+		Canvas->ClipY * 0.54f,
+		Canvas->ClipX,
+		Font,
+		FLinearColor(0.72f, 0.70f, 0.66f),
+		0.90f);
 }
 
 void ASurvivorHorrorHUD::DrawInventoryScreen(

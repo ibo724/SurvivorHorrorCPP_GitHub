@@ -5,6 +5,8 @@
 #include "CodeVeronicaCameraZone.h"
 #include "Components/InputComponent.h"
 #include "GameFramework/Pawn.h"
+#include "Kismet/GameplayStatics.h"
+#include "SurvivorHealthComponent.h"
 #include "SurvivorInventoryComponent.h"
 #include "SurvivorItemDefinition.h"
 
@@ -66,6 +68,12 @@ void ASurvivorHorrorPlayerController::SetupInputComponent()
 		&ASurvivorHorrorPlayerController::DiscardSelectedObsoleteItem);
 	DiscardBinding.bExecuteWhenPaused = true;
 	DiscardBinding.bConsumeInput = false;
+
+	FInputActionBinding& RestartBinding = InputComponent->BindAction(
+		TEXT("RestartAfterDeath"), IE_Pressed, this,
+		&ASurvivorHorrorPlayerController::RestartAfterDeath);
+	RestartBinding.bExecuteWhenPaused = true;
+	RestartBinding.bConsumeInput = false;
 }
 
 USurvivorInventoryComponent* ASurvivorHorrorPlayerController::GetPlayerInventory() const
@@ -76,9 +84,38 @@ USurvivorInventoryComponent* ASurvivorHorrorPlayerController::GetPlayerInventory
 		: nullptr;
 }
 
+USurvivorHealthComponent* ASurvivorHorrorPlayerController::GetPlayerHealth() const
+{
+	const APawn* PlayerPawn = GetPawn();
+	return IsValid(PlayerPawn)
+		? PlayerPawn->FindComponentByClass<USurvivorHealthComponent>()
+		: nullptr;
+}
+
 void ASurvivorHorrorPlayerController::ToggleInventory()
 {
+	if (const USurvivorHealthComponent* Health = GetPlayerHealth();
+		IsValid(Health) && Health->IsDead())
+	{
+		return;
+	}
 	SetInventoryOpen(!bInventoryOpen);
+}
+
+void ASurvivorHorrorPlayerController::RestartAfterDeath()
+{
+	const USurvivorHealthComponent* Health = GetPlayerHealth();
+	if (!IsValid(Health) || !Health->IsDead())
+	{
+		return;
+	}
+
+	SetPause(false);
+	const FString CurrentLevelName = UGameplayStatics::GetCurrentLevelName(this, true);
+	if (!CurrentLevelName.IsEmpty())
+	{
+		UGameplayStatics::OpenLevel(this, FName(*CurrentLevelName));
+	}
 }
 
 void ASurvivorHorrorPlayerController::SetInventoryOpen(const bool bNewOpen)

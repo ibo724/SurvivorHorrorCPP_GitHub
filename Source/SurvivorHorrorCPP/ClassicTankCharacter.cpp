@@ -10,7 +10,9 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
 #include "SurvivorInventoryComponent.h"
+#include "SurvivorHealthComponent.h"
 #include "SurvivorInteractionComponent.h"
+#include "SurvivorNoiseEmitterComponent.h"
 #include "UObject/ConstructorHelpers.h"
 
 AClassicTankCharacter::AClassicTankCharacter()
@@ -38,6 +40,9 @@ AClassicTankCharacter::AClassicTankCharacter()
 		TEXT("InteractionComponent"));
 	InventoryComponent = CreateDefaultSubobject<USurvivorInventoryComponent>(
 		TEXT("InventoryComponent"));
+	HealthComponent = CreateDefaultSubobject<USurvivorHealthComponent>(TEXT("HealthComponent"));
+	NoiseEmitterComponent = CreateDefaultSubobject<USurvivorNoiseEmitterComponent>(
+		TEXT("NoiseEmitterComponent"));
 
 	// This engine capsule is only a temporary stand-in. It makes turning and
 	// movement visible in a completely blank project and will be removed when a
@@ -55,6 +60,31 @@ AClassicTankCharacter::AClassicTankCharacter()
 	{
 		PreviewBody->SetStaticMesh(PreviewMesh.Object);
 	}
+}
+
+void AClassicTankCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+	if (IsValid(HealthComponent))
+	{
+		HealthComponent->OnDeath.AddDynamic(this, &AClassicTankCharacter::HandleDeath);
+	}
+}
+
+float AClassicTankCharacter::TakeDamage(
+	const float DamageAmount,
+	const FDamageEvent& DamageEvent,
+	AController* EventInstigator,
+	AActor* DamageCauser)
+{
+	const float ParentDamage = Super::TakeDamage(
+		DamageAmount,
+		DamageEvent,
+		EventInstigator,
+		DamageCauser);
+	return IsValid(HealthComponent)
+		? HealthComponent->ApplyDamage(ParentDamage)
+		: 0.0f;
 }
 
 void AClassicTankCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -80,6 +110,11 @@ void AClassicTankCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
 
 void AClassicTankCharacter::MoveForward(const float AxisValue)
 {
+	if (IsDead())
+	{
+		return;
+	}
+
 	LastMoveAxisValue = AxisValue;
 	if (FMath::IsNearlyZero(AxisValue))
 	{
@@ -109,7 +144,7 @@ void AClassicTankCharacter::MoveForward(const float AxisValue)
 
 void AClassicTankCharacter::Turn(const float AxisValue)
 {
-	if (FMath::IsNearlyZero(AxisValue) || !GetWorld())
+	if (IsDead() || FMath::IsNearlyZero(AxisValue) || !GetWorld())
 	{
 		return;
 	}
@@ -127,7 +162,7 @@ void AClassicTankCharacter::Turn(const float AxisValue)
 
 void AClassicTankCharacter::Interact()
 {
-	if (InteractionComponent)
+	if (!IsDead() && InteractionComponent)
 	{
 		InteractionComponent->TryInteract();
 	}
@@ -135,6 +170,11 @@ void AClassicTankCharacter::Interact()
 
 void AClassicTankCharacter::StartRunning()
 {
+	if (IsDead())
+	{
+		return;
+	}
+
 	bRunInputHeld = true;
 	if (LastMoveAxisValue < 0.0f
 		&& !bQuickTurnLatched
@@ -161,5 +201,23 @@ void AClassicTankCharacter::PerformQuickTurn()
 	if (Controller)
 	{
 		Controller->SetControlRotation(GetActorRotation());
+	}
+}
+
+bool AClassicTankCharacter::IsDead() const
+{
+	return IsValid(HealthComponent) && HealthComponent->IsDead();
+}
+
+void AClassicTankCharacter::HandleDeath()
+{
+	bRunInputHeld = false;
+	bQuickTurnLatched = false;
+	GetCharacterMovement()->StopMovementImmediately();
+	GetCharacterMovement()->DisableMovement();
+	if (AController* OwningController = GetController())
+	{
+		OwningController->SetIgnoreMoveInput(true);
+		OwningController->SetIgnoreLookInput(true);
 	}
 }

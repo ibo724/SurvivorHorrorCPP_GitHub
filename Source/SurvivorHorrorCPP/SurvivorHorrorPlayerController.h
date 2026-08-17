@@ -8,6 +8,7 @@
 
 class ACodeVeronicaCameraZone;
 class APawn;
+class USurvivorHealthComponent;
 class USurvivorInventoryComponent;
 
 /** Owns the active room camera and guarantees that only one zone tracks at a time. */
@@ -31,6 +32,9 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Inventory")
 	USurvivorInventoryComponent* GetPlayerInventory() const;
 
+	UFUNCTION(BlueprintPure, Category = "Health")
+	USurvivorHealthComponent* GetPlayerHealth() const;
+
 protected:
 	virtual void SetupInputComponent() override;
 
@@ -45,6 +49,7 @@ private:
 	void ConfirmInventoryMove();
 	void InspectSelectedItem();
 	void DiscardSelectedObsoleteItem();
+	void RestartAfterDeath();
 	void SetInventoryOpen(bool bNewOpen);
 
 	UPROPERTY(Transient)

@@ -7,8 +7,10 @@
 #include "ClassicTankCharacter.generated.h"
 
 class UStaticMeshComponent;
+class USurvivorHealthComponent;
 class USurvivorInventoryComponent;
 class USurvivorInteractionComponent;
+class USurvivorNoiseEmitterComponent;
 
 /**
  * Old-school survival-horror character movement:
@@ -26,8 +28,14 @@ class SURVIVORHORRORCPP_API AClassicTankCharacter : public ACharacter
 
 public:
 	AClassicTankCharacter();
+	virtual float TakeDamage(
+		float DamageAmount,
+		const FDamageEvent& DamageEvent,
+		AController* EventInstigator,
+		AActor* DamageCauser) override;
 
 protected:
+	virtual void BeginPlay() override;
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 
 private:
@@ -37,6 +45,10 @@ private:
 	void StartRunning();
 	void StopRunning();
 	void PerformQuickTurn();
+	bool IsDead() const;
+
+	UFUNCTION()
+	void HandleDeath();
 
 	/** Character-facing interaction detection; independent of the room camera. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Interaction", meta = (AllowPrivateAccess = "true"))
@@ -45,6 +57,14 @@ private:
 	/** Runtime item storage; its final capacity and UI will be decided later. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<USurvivorInventoryComponent> InventoryComponent;
+
+	/** Reusable health; future healing items and weapons will talk only to this component. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Health", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<USurvivorHealthComponent> HealthComponent;
+
+	/** Reports walking/running and bag noise to hearing-based AI. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Noise", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<USurvivorNoiseEmitterComponent> NoiseEmitterComponent;
 
 	/** Temporary visible body so the blank project is testable before character art is imported. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Tank Controls|Preview", meta = (AllowPrivateAccess = "true"))
