@@ -159,6 +159,33 @@ int32 USurvivorInventoryComponent::RemoveItem(
 	return RemovedQuantity;
 }
 
+int32 USurvivorInventoryComponent::RemoveItemAtSlot(
+	const int32 SlotIndex,
+	const int32 Quantity)
+{
+	if (!Entries.IsValidIndex(SlotIndex)
+		|| Quantity <= 0
+		|| !IsValid(Entries[SlotIndex].ItemDefinition)
+		|| Entries[SlotIndex].Quantity <= 0)
+	{
+		return 0;
+	}
+
+	USurvivorItemDefinition* ItemDefinition = Entries[SlotIndex].ItemDefinition;
+	const int32 RemovedQuantity = FMath::Min(Quantity, Entries[SlotIndex].Quantity);
+	Entries[SlotIndex].Quantity -= RemovedQuantity;
+	if (Entries[SlotIndex].Quantity <= 0)
+	{
+		Entries[SlotIndex] = FSurvivorInventoryEntry();
+	}
+	if (GetItemQuantity(ItemDefinition) <= 0)
+	{
+		ObsoleteItemIds.Remove(GetInspectionMemoryKey(ItemDefinition));
+	}
+	OnInventoryChanged.Broadcast();
+	return RemovedQuantity;
+}
+
 int32 USurvivorInventoryComponent::GetItemQuantity(
 	const USurvivorItemDefinition* ItemDefinition) const
 {

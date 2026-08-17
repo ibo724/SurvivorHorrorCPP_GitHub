@@ -4,6 +4,9 @@
 
 #include "Misc/AutomationTest.h"
 #include "SurvivorHealthComponent.h"
+#include "SurvivorInventoryComponent.h"
+#include "SurvivorItemDefinition.h"
+#include "SurvivorItemUseComponent.h"
 #include "SurvivorNoiseEmitterComponent.h"
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(
@@ -50,6 +53,55 @@ bool FSurvivorMovementNoiseTest::RunTest(const FString& Parameters)
 	TestTrue(TEXT("Running is louder than an empty-bag walk"), Run > QuietWalk);
 	TestTrue(TEXT("Calculated loudness respects its maximum"),
 		USurvivorNoiseEmitterComponent::CalculateMovementLoudness(320.0f, 100) <= 1.50f);
+
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(
+	FSurvivorHealthItemUseTest,
+	"SurvivorHorror.Inventory.HealthItemUse",
+	EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+
+bool FSurvivorHealthItemUseTest::RunTest(const FString& Parameters)
+{
+	USurvivorInventoryComponent* Inventory = NewObject<USurvivorInventoryComponent>();
+	USurvivorHealthComponent* Health = NewObject<USurvivorHealthComponent>();
+	USurvivorItemDefinition* HealthItem = NewObject<USurvivorItemDefinition>();
+	HealthItem->ItemId = TEXT("automation_health_item");
+	HealthItem->MaxStackSize = 2;
+	HealthItem->UseEffect = ESurvivorItemUseEffect::RestoreHealth;
+	HealthItem->HealthRestoreAmount = 50.0f;
+
+	TestEqual(TEXT("Two health items fit in one test stack"), Inventory->AddItem(HealthItem, 2), 2);
+	TestEqual(
+		TEXT("A health item cannot be wasted at full health"),
+		USurvivorItemUseComponent::TryUseItemForComponents(Inventory, Health, 0),
+		ESurvivorItemUseResult::HealthFull);
+	TestEqual(TEXT("Full-health rejection consumes nothing"), Inventory->GetItemQuantity(HealthItem), 2);
+
+	Health->ApplyDamage(75.0f);
+	TestEqual(TEXT("Test actor is reduced to 25 health"), Health->GetCurrentHealth(), 25.0f);
+	TestEqual(
+		TEXT("First health item succeeds"),
+		USurvivorItemUseComponent::TryUseItemForComponents(Inventory, Health, 0),
+		ESurvivorItemUseResult::Success);
+	TestEqual(TEXT("First item restores 50 health"), Health->GetCurrentHealth(), 75.0f);
+	TestEqual(TEXT("Exactly one item is consumed"), Inventory->GetItemQuantity(HealthItem), 1);
+
+	TestEqual(
+		TEXT("Second health item succeeds"),
+		USurvivorItemUseComponent::TryUseItemForComponents(Inventory, Health, 0),
+		ESurvivorItemUseResult::Success);
+	TestEqual(TEXT("Healing clamps at maximum health"), Health->GetCurrentHealth(), 100.0f);
+	TestEqual(TEXT("Second item empties the stack"), Inventory->GetItemQuantity(HealthItem), 0);
+
+	Health->ApplyDamage(100.0f);
+	Inventory->AddItem(HealthItem, 1);
+	TestEqual(
+		TEXT("A dead actor cannot use a health item"),
+		USurvivorItemUseComponent::TryUseItemForComponents(Inventory, Health, 0),
+		ESurvivorItemUseResult::UserDead);
+	TestEqual(TEXT("Death rejection consumes nothing"), Inventory->GetItemQuantity(HealthItem), 1);
 
 	return true;
 }

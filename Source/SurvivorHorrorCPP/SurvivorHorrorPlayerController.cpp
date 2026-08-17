@@ -7,7 +7,9 @@
 #include "GameFramework/Pawn.h"
 #include "Kismet/GameplayStatics.h"
 #include "SurvivorHealthComponent.h"
+#include "SurvivorHorrorHUD.h"
 #include "SurvivorInventoryComponent.h"
+#include "SurvivorItemUseComponent.h"
 #include "SurvivorItemDefinition.h"
 
 void ASurvivorHorrorPlayerController::SetupInputComponent()
@@ -62,6 +64,12 @@ void ASurvivorHorrorPlayerController::SetupInputComponent()
 		&ASurvivorHorrorPlayerController::InspectSelectedItem);
 	InspectBinding.bExecuteWhenPaused = true;
 	InspectBinding.bConsumeInput = false;
+
+	FInputActionBinding& UseBinding = InputComponent->BindAction(
+		TEXT("InventoryUse"), IE_Pressed, this,
+		&ASurvivorHorrorPlayerController::UseSelectedItem);
+	UseBinding.bExecuteWhenPaused = true;
+	UseBinding.bConsumeInput = false;
 
 	FInputActionBinding& DiscardBinding = InputComponent->BindAction(
 		TEXT("InventoryDiscard"), IE_Pressed, this,
@@ -246,6 +254,72 @@ void ASurvivorHorrorPlayerController::InspectSelectedItem()
 			Log,
 			TEXT("Inspection memory unlocked for item '%s'."),
 			*Entry.ItemDefinition->GetName());
+	}
+}
+
+void ASurvivorHorrorPlayerController::UseSelectedItem()
+{
+	USurvivorInventoryComponent* Inventory = GetPlayerInventory();
+	APawn* PlayerPawn = GetPawn();
+	if (!bInventoryOpen
+		|| MoveSourceSlot != INDEX_NONE
+		|| !IsValid(Inventory)
+		|| !IsValid(PlayerPawn))
+	{
+		return;
+	}
+
+	USurvivorItemUseComponent* ItemUse =
+		PlayerPawn->FindComponentByClass<USurvivorItemUseComponent>();
+	const FSurvivorInventoryEntry Entry = Inventory->GetEntryAt(SelectedInventorySlot);
+	const ESurvivorItemUseResult Result = IsValid(ItemUse)
+		? ItemUse->TryUseItemAtSlot(SelectedInventorySlot)
+		: ESurvivorItemUseResult::MissingComponent;
+
+	FText Message;
+	switch (Result)
+	{
+	case ESurvivorItemUseResult::Success:
+	{
+		const FText ItemName = IsValid(Entry.ItemDefinition)
+			? (Entry.ItemDefinition->DisplayName.IsEmpty()
+				? FText::FromName(Entry.ItemDefinition->ItemId)
+				: Entry.ItemDefinition->DisplayName)
+			: NSLOCTEXT("SurvivorItemUse", "FallbackItem", "Eşya");
+		Message = FText::Format(
+			NSLOCTEXT("SurvivorItemUse", "Used", "{0} kullanıldı."),
+			ItemName);
+		break;
+	}
+	case ESurvivorItemUseResult::HealthFull:
+		Message = NSLOCTEXT(
+			"SurvivorItemUse",
+			"HealthFull",
+			"Şu anda kullanmana gerek yok; sağlığın zaten iyi.");
+		break;
+	case ESurvivorItemUseResult::NotUsable:
+		Message = NSLOCTEXT(
+			"SurvivorItemUse",
+			"NotUsable",
+			"Bu eşya şu anda kullanılamaz.");
+		break;
+	case ESurvivorItemUseResult::InvalidSlot:
+		Message = NSLOCTEXT(
+			"SurvivorItemUse",
+			"InvalidSlot",
+			"Bu yuvada kullanılabilecek bir eşya yok.");
+		break;
+	default:
+		Message = NSLOCTEXT(
+			"SurvivorItemUse",
+			"Unavailable",
+			"Eşya kullanılamadı.");
+		break;
+	}
+
+	if (ASurvivorHorrorHUD* HUD = Cast<ASurvivorHorrorHUD>(GetHUD()))
+	{
+		HUD->ShowNotification(Message);
 	}
 }
 

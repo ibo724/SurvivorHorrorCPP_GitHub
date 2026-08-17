@@ -31,6 +31,7 @@ private:
 		UFont* Font);
 	void DrawHealthStatus(const USurvivorHealthComponent* Health, UFont* Font);
 	void DrawDeathScreen(UFont* Font);
+	void DrawActiveNotification(UFont* Font);
 	void DrawBorder(float X, float Y, float Width, float Height, float Thickness, const FLinearColor& Color);
 	void DrawCenteredTextInArea(
 		const FString& Text,

@@ -12,6 +12,7 @@
 #include "SurvivorInventoryComponent.h"
 #include "SurvivorHealthComponent.h"
 #include "SurvivorInteractionComponent.h"
+#include "SurvivorItemUseComponent.h"
 #include "SurvivorNoiseEmitterComponent.h"
 #include "UObject/ConstructorHelpers.h"
 
@@ -43,6 +44,7 @@ AClassicTankCharacter::AClassicTankCharacter()
 	HealthComponent = CreateDefaultSubobject<USurvivorHealthComponent>(TEXT("HealthComponent"));
 	NoiseEmitterComponent = CreateDefaultSubobject<USurvivorNoiseEmitterComponent>(
 		TEXT("NoiseEmitterComponent"));
+	ItemUseComponent = CreateDefaultSubobject<USurvivorItemUseComponent>(TEXT("ItemUseComponent"));
 
 	// This engine capsule is only a temporary stand-in. It makes turning and
 	// movement visible in a completely blank project and will be removed when a

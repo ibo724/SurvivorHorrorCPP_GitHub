@@ -10,6 +10,7 @@ class UStaticMeshComponent;
 class USurvivorHealthComponent;
 class USurvivorInventoryComponent;
 class USurvivorInteractionComponent;
+class USurvivorItemUseComponent;
 class USurvivorNoiseEmitterComponent;
 
 /**
@@ -65,6 +66,10 @@ private:
 	/** Reports walking/running and bag noise to hearing-based AI. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Noise", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<USurvivorNoiseEmitterComponent> NoiseEmitterComponent;
+
+	/** Executes tunable consumable effects selected from the inventory. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<USurvivorItemUseComponent> ItemUseComponent;
 
 	/** Temporary visible body so the blank project is testable before character art is imported. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Tank Controls|Preview", meta = (AllowPrivateAccess = "true"))

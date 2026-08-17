@@ -61,6 +61,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
 	int32 RemoveItem(USurvivorItemDefinition* ItemDefinition, int32 Quantity = 1);
 
+	/** Removes only from the chosen physical slot, preserving player arrangement choices. */
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
+	int32 RemoveItemAtSlot(int32 SlotIndex, int32 Quantity = 1);
+
 	UFUNCTION(BlueprintPure, Category = "Inventory")
 	int32 GetItemQuantity(const USurvivorItemDefinition* ItemDefinition) const;
 

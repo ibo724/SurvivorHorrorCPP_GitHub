@@ -110,6 +110,11 @@ void ASurvivorHorrorHUD::DrawHUD()
 		&& IsValid(Inventory))
 	{
 		DrawInventoryScreen(SurvivorController, Inventory, PromptFont);
+		if (IsValid(Health))
+		{
+			DrawHealthStatus(Health, PromptFont);
+		}
+		DrawActiveNotification(PromptFont);
 		return;
 	}
 
@@ -118,22 +123,7 @@ void ASurvivorHorrorHUD::DrawHUD()
 		DrawHealthStatus(Health, PromptFont);
 	}
 
-	if (!NotificationText.IsEmpty() && GetWorld()
-		&& GetWorld()->GetTimeSeconds() < NotificationEndTime)
-	{
-		const FString NotificationString = NotificationText.ToString();
-		float NotificationWidth = 0.0f;
-		float NotificationHeight = 0.0f;
-		Canvas->StrLen(PromptFont, NotificationString, NotificationWidth, NotificationHeight);
-		DrawText(
-			NotificationString,
-			FLinearColor(1.0f, 0.88f, 0.58f),
-			(Canvas->ClipX - NotificationWidth) * 0.5f,
-			Canvas->ClipY * 0.70f,
-			PromptFont,
-			1.0f,
-			false);
-	}
+	DrawActiveNotification(PromptFont);
 
 	USurvivorInteractionComponent* InteractionComponent = IsValid(PlayerPawn)
 		? PlayerPawn->FindComponentByClass<USurvivorInteractionComponent>()
@@ -214,6 +204,37 @@ void ASurvivorHorrorHUD::DrawDeathScreen(UFont* Font)
 		Font,
 		FLinearColor(0.72f, 0.70f, 0.66f),
 		0.90f);
+}
+
+void ASurvivorHorrorHUD::DrawActiveNotification(UFont* Font)
+{
+	if (NotificationText.IsEmpty() || !GetWorld()
+		|| GetWorld()->GetTimeSeconds() >= NotificationEndTime)
+	{
+		return;
+	}
+
+	const FString NotificationString = NotificationText.ToString();
+	float NotificationWidth = 0.0f;
+	float NotificationHeight = 0.0f;
+	Canvas->StrLen(Font, NotificationString, NotificationWidth, NotificationHeight);
+	const float Padding = 12.0f;
+	const float X = (Canvas->ClipX - NotificationWidth) * 0.5f;
+	const float Y = Canvas->ClipY * 0.70f;
+	DrawRect(
+		FLinearColor(0.0f, 0.0f, 0.0f, 0.82f),
+		X - Padding,
+		Y - Padding * 0.5f,
+		NotificationWidth + Padding * 2.0f,
+		NotificationHeight + Padding);
+	DrawText(
+		NotificationString,
+		FLinearColor(1.0f, 0.88f, 0.58f),
+		X,
+		Y,
+		Font,
+		1.0f,
+		false);
 }
 
 void ASurvivorHorrorHUD::DrawInventoryScreen(
@@ -442,6 +463,13 @@ void ASurvivorHorrorHUD::DrawInventoryScreen(
 			InspectionText = TEXT("[R] ARTIK GEREKMİYOR — çantadan çıkar. ") + InspectionText;
 			InspectionColor = FLinearColor(0.96f, 0.65f, 0.24f);
 		}
+		if (Item->UseEffect == ESurvivorItemUseEffect::RestoreHealth)
+		{
+			InspectionText = FString::Printf(
+				TEXT("[BOŞLUK] KULLAN — %d can yeniler. "),
+				FMath::RoundToInt(Item->HealthRestoreAmount)) + InspectionText;
+			InspectionColor = FLinearColor(0.36f, 0.86f, 0.46f);
+		}
 		DrawWrappedText(
 			InspectionText,
 			DetailX + 18.0f * UIScale,
@@ -466,13 +494,13 @@ void ASurvivorHorrorHUD::DrawInventoryScreen(
 	}
 
 	DrawCenteredTextInArea(
-		TEXT("WASD / Oklar: Gezin   E: Taşı   F: İncele   R: Gereksiz anahtarı at   I / Tab: Kapat"),
+		TEXT("WASD / Oklar: Gezin   E: Taşı   BOŞLUK: Kullan   F: İncele   R: Gereksiz anahtarı at   I / Tab: Kapat"),
 		0.0f,
 		Canvas->ClipY - 38.0f * UIScale,
 		Canvas->ClipX,
 		Font,
 		FLinearColor(0.48f, 0.54f, 0.54f),
-		0.68f * UIScale);
+		0.62f * UIScale);
 }
 
 void ASurvivorHorrorHUD::DrawBorder(

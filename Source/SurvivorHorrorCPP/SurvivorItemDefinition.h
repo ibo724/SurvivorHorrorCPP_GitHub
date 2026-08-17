@@ -18,6 +18,14 @@ enum class ESurvivorItemNoiseClass : uint8
 	Metallic UMETA(DisplayName = "Metal")
 };
 
+/** Gameplay effect performed when the player chooses Use in the inventory. */
+UENUM(BlueprintType)
+enum class ESurvivorItemUseEffect : uint8
+{
+	None UMETA(DisplayName = "Kullanılamaz"),
+	RestoreHealth UMETA(DisplayName = "Sağlık Yenile")
+};
+
 /**
  * Designer-authored data shared by every copy of an item.
  *
@@ -68,4 +76,16 @@ public:
 	/** How many copies fit in one stack. Use 1 for unique items and keys. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item", meta = (ClampMin = "1", UIMin = "1"))
 	int32 MaxStackSize = 1;
+
+	/** Leave as None for keys, ammunition and inspection-only objects. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item|Use")
+	ESurvivorItemUseEffect UseEffect = ESurvivorItemUseEffect::None;
+
+	/** Tunable per item; the final healing-item balance is not locked in C++. */
+	UPROPERTY(
+		EditAnywhere,
+		BlueprintReadOnly,
+		Category = "Item|Use",
+		meta = (ClampMin = "0.0", EditCondition = "UseEffect == ESurvivorItemUseEffect::RestoreHealth", EditConditionHides))
+	float HealthRestoreAmount = 50.0f;
 };

@@ -48,6 +48,7 @@ private:
 	void NavigateInventoryRight();
 	void ConfirmInventoryMove();
 	void InspectSelectedItem();
+	void UseSelectedItem();
 	void DiscardSelectedObsoleteItem();
 	void RestartAfterDeath();
 	void SetInventoryOpen(bool bNewOpen);
