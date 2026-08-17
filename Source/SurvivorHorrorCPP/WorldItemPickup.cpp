@@ -72,6 +72,14 @@ void AWorldItemPickup::Interact_Implementation(APawn* InteractingPawn)
 	const int32 AddedQuantity = Inventory->AddItem(ItemDefinition, Quantity);
 	if (AddedQuantity <= 0)
 	{
+		if (APlayerController* PlayerController = Cast<APlayerController>(InteractingPawn->GetController()))
+		{
+			if (ASurvivorHorrorHUD* HUD = Cast<ASurvivorHorrorHUD>(PlayerController->GetHUD()))
+			{
+				HUD->ShowNotification(
+					NSLOCTEXT("SurvivorPickup", "InventoryFull", "Daha fazla taşıyamam."));
+			}
+		}
 		return;
 	}
 

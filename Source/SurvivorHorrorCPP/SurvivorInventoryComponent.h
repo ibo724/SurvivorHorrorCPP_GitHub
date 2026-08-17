@@ -23,11 +23,22 @@ struct SURVIVORHORRORCPP_API FSurvivorInventoryEntry
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FSurvivorInventoryChangedSignature);
 
+/** Player-facing summary of the current bag noise score. */
+UENUM(BlueprintType)
+enum class ESurvivorBagNoiseLevel : uint8
+{
+	Silent,
+	Low,
+	Medium,
+	High
+};
+
 /**
  * Reusable item storage for the player character.
  *
- * MaxSlots is intentionally unlimited for now. Setting it later makes the
- * component enforce a classic slot limit without replacing this system.
+ * Entries always contains eight real slots, including empty slots. Keeping
+ * empty positions lets arrangement affect bag noise and supports classic
+ * inventory navigation.
  */
 UCLASS(ClassGroup = (Survivor), meta = (BlueprintSpawnableComponent))
 class SURVIVORHORRORCPP_API USurvivorInventoryComponent : public UActorComponent
@@ -36,6 +47,11 @@ class SURVIVORHORRORCPP_API USurvivorInventoryComponent : public UActorComponent
 
 public:
 	USurvivorInventoryComponent();
+
+protected:
+	virtual void BeginPlay() override;
+
+public:
 
 	/** Adds as many items as possible and returns the amount actually added. */
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
@@ -54,15 +70,50 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Inventory")
 	TArray<FSurvivorInventoryEntry> GetEntries() const { return Entries; }
 
+	UFUNCTION(BlueprintPure, Category = "Inventory")
+	FSurvivorInventoryEntry GetEntryAt(int32 SlotIndex) const;
+
+	UFUNCTION(BlueprintPure, Category = "Inventory")
+	int32 GetSlotCount() const { return MaxSlots; }
+
+	UFUNCTION(BlueprintPure, Category = "Inventory")
+	int32 GetColumnCount() const { return InventoryColumns; }
+
+	/** Swaps an occupied slot with an empty or occupied target slot. */
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
+	bool MoveOrSwapSlots(int32 FromSlot, int32 ToSlot);
+
+	/** Returns true only when this call discovers and remembers the item type. */
+	UFUNCTION(BlueprintCallable, Category = "Inventory|Inspection")
+	bool InspectItemAtSlot(int32 SlotIndex);
+
+	UFUNCTION(BlueprintPure, Category = "Inventory|Inspection")
+	bool IsItemInspected(const USurvivorItemDefinition* ItemDefinition) const;
+
+	UFUNCTION(BlueprintPure, Category = "Inventory|Bag Noise")
+	int32 GetBagNoiseScore() const;
+
+	UFUNCTION(BlueprintPure, Category = "Inventory|Bag Noise")
+	ESurvivorBagNoiseLevel GetBagNoiseLevel() const;
+
 	/** Fired after the stored entries change; the future UI can listen to this. */
 	UPROPERTY(BlueprintAssignable, Category = "Inventory")
 	FSurvivorInventoryChangedSignature OnInventoryChanged;
 
 private:
-	/** Zero means unlimited. We will choose the real capacity together later. */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Inventory", meta = (AllowPrivateAccess = "true", ClampMin = "0", UIMin = "0"))
-	int32 MaxSlots = 0;
+	void EnsureSlotsInitialized();
+	static FName GetInspectionMemoryKey(const USurvivorItemDefinition* ItemDefinition);
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Inventory", meta = (AllowPrivateAccess = "true", ClampMin = "1", UIMin = "1"))
+	int32 MaxSlots = 8;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Inventory", meta = (AllowPrivateAccess = "true", ClampMin = "1", UIMin = "1"))
+	int32 InventoryColumns = 4;
 
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "Inventory", meta = (AllowPrivateAccess = "true"))
 	TArray<FSurvivorInventoryEntry> Entries;
+
+	/** Session memory; this will be serialized when the save-game system is added. */
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "Inventory|Inspection", meta = (AllowPrivateAccess = "true"))
+	TSet<FName> InspectedItemIds;
 };

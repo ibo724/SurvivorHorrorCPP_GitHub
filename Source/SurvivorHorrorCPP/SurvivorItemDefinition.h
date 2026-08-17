@@ -8,6 +8,16 @@
 
 class UTexture2D;
 
+/** How much an item contributes to the player's bag noise. */
+UENUM(BlueprintType)
+enum class ESurvivorItemNoiseClass : uint8
+{
+	Silent UMETA(DisplayName = "Sessiz"),
+	Soft UMETA(DisplayName = "Yumuşak"),
+	Rigid UMETA(DisplayName = "Sert"),
+	Metallic UMETA(DisplayName = "Metal")
+};
+
 /**
  * Designer-authored data shared by every copy of an item.
  *
@@ -32,9 +42,20 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item", meta = (MultiLine = "true"))
 	FText Description;
 
+	/**
+	 * Hidden detail revealed the first time this item type is inspected. Once
+	 * found, the detail is remembered for every copy of the same item.
+	 */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item|Inspection", meta = (MultiLine = "true"))
+	FText InspectionDiscovery;
+
 	/** Optional icon reserved for the future inventory screen. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item")
 	TSoftObjectPtr<UTexture2D> Icon;
+
+	/** Used by the Bag Noise system. Soft or empty slots break noisy adjacency. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item|Bag Noise")
+	ESurvivorItemNoiseClass NoiseClass = ESurvivorItemNoiseClass::Silent;
 
 	/** How many copies fit in one stack. Use 1 for unique items and keys. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item", meta = (ClampMin = "1", UIMin = "1"))

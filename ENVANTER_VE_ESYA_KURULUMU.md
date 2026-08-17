@@ -1,8 +1,8 @@
 # Envanter ve eşya altyapısı
 
-Bu aşamada oyunun nihai envanter ekranı, slot sayısı ve eşya kategorileri
-seçilmedi. Sistem varsayılan olarak sınırsız slotla çalışır; kapasite daha sonra
-tek bir ayarla etkinleştirilebilir.
+Envanter artık klasik survival-horror yapısında 2x4, toplam sekiz fiziksel
+yuvayla çalışır. Eşya yığınları bir yuva kullanır; dokuzuncu eşya için uygun
+bir yığın veya boş yuva yoksa eşya alınmaz.
 
 ## Test eşyası oluşturma
 
@@ -27,5 +27,5 @@ tek bir ayarla etkinleştirilebilir.
 - Ekranda `Test Eşyası alındı.` bildirimi belirir.
 - Output Log'da `Pickup collected: Test Eşyası x1` kaydı oluşur.
 
-Envanter şimdilik arka planda tutulur. Görsel menü, kapasite ve eşya kullanım
-kuralları yaratıcı yönü belirledikten sonra bu altyapının üstüne eklenecek.
+Envanter `I` veya `Tab` ile açılır. Yeni çanta sesi, eşya taşıma ve inceleme
+testleri `CANTA_SESI_VE_INCELEME_TESTI.md` belgesinde anlatılır.
