@@ -65,6 +65,16 @@ void AClassicTankCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
 	PlayerInputComponent->BindAxis(TEXT("Turn"), this, &AClassicTankCharacter::Turn);
 	PlayerInputComponent->BindAction(
 		TEXT("Interact"), IE_Pressed, this, &AClassicTankCharacter::Interact);
+
+	FInputActionBinding& RunPressedBinding = PlayerInputComponent->BindAction(
+		TEXT("Run"), IE_Pressed, this, &AClassicTankCharacter::StartRunning);
+	RunPressedBinding.bExecuteWhenPaused = true;
+	RunPressedBinding.bConsumeInput = false;
+
+	FInputActionBinding& RunReleasedBinding = PlayerInputComponent->BindAction(
+		TEXT("Run"), IE_Released, this, &AClassicTankCharacter::StopRunning);
+	RunReleasedBinding.bExecuteWhenPaused = true;
+	RunReleasedBinding.bConsumeInput = false;
 }
 
 void AClassicTankCharacter::MoveForward(const float AxisValue)
@@ -74,7 +84,10 @@ void AClassicTankCharacter::MoveForward(const float AxisValue)
 		return;
 	}
 
-	GetCharacterMovement()->MaxWalkSpeed = ForwardSpeed;
+	UCharacterMovementComponent* Movement = GetCharacterMovement();
+	Movement->MaxWalkSpeed = bRunInputHeld && AxisValue > 0.0f
+		? FMath::Max(ForwardSpeed, RunSpeed)
+		: ForwardSpeed;
 
 	const float DirectionMultiplier = AxisValue < 0.0f ? BackwardSpeedMultiplier : 1.0f;
 	AddMovementInput(GetActorForwardVector(), AxisValue * DirectionMultiplier);
@@ -104,4 +117,15 @@ void AClassicTankCharacter::Interact()
 	{
 		InteractionComponent->TryInteract();
 	}
+}
+
+void AClassicTankCharacter::StartRunning()
+{
+	bRunInputHeld = true;
+}
+
+void AClassicTankCharacter::StopRunning()
+{
+	bRunInputHeld = false;
+	GetCharacterMovement()->MaxWalkSpeed = ForwardSpeed;
 }

@@ -6,7 +6,9 @@ Bu aşamada proje, klasik Resident Evil tarzı temel tank kontrolüne sahiptir:
 - `S` / `Aşağı Ok`: Karakterin baktığı yönün tersine, daha yavaş geri gider.
 - `A` / `Sol Ok`: Karakteri olduğu yerde sola döndürür.
 - `D` / `Sağ Ok`: Karakteri olduğu yerde sağa döndürür.
+- `Shift` + `W` / `Yukarı Ok`: Karakterin baktığı yöne koşar.
 - Gamepad sol çubuğu da aynı davranışı verir.
+- Gamepad sol omuz tuşu basılıyken ileri hareket koşuya dönüşür.
 
 Sağa ve sola strafe özellikle yoktur. Karakterdeki basit blok gövde yalnızca
 gerçek model ve animasyonlar eklenene kadar kullanılacak geçici test parçasıdır.
@@ -32,6 +34,7 @@ bölgelerini ve kamera geçişlerini kuracağız.
 değerler kod yazmadan değiştirilebilir:
 
 - `Forward Speed`: 180 cm/s
+- `Run Speed`: 320 cm/s
 - `Backward Speed Multiplier`: 0.65
 - `Turn Rate`: 95 derece/saniye
 

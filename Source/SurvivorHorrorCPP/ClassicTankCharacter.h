@@ -14,6 +14,7 @@ class USurvivorInteractionComponent;
  * Old-school survival-horror character movement:
  * - Forward/backward input moves along the character's own forward direction.
  * - Left/right input rotates the character instead of strafing.
+ * - Holding Run increases forward speed but never accelerates reverse movement.
  *
  * The values below can later be tuned from a Blueprint child class without
  * changing C++ code.
@@ -33,6 +34,8 @@ private:
 	void MoveForward(float AxisValue);
 	void Turn(float AxisValue);
 	void Interact();
+	void StartRunning();
+	void StopRunning();
 
 	/** Character-facing interaction detection; independent of the room camera. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Interaction", meta = (AllowPrivateAccess = "true"))
@@ -50,6 +53,10 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Tank Controls|Movement", meta = (AllowPrivateAccess = "true", ClampMin = "0.0", Units = "cm/s"))
 	float ForwardSpeed = 180.0f;
 
+	/** Forward speed while the run button is held. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Tank Controls|Movement", meta = (AllowPrivateAccess = "true", ClampMin = "0.0", Units = "cm/s"))
+	float RunSpeed = 320.0f;
+
 	/** Reverse speed as a fraction of ForwardSpeed. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Tank Controls|Movement", meta = (AllowPrivateAccess = "true", ClampMin = "0.0", ClampMax = "1.0"))
 	float BackwardSpeedMultiplier = 0.65f;
@@ -57,4 +64,6 @@ private:
 	/** Rotation speed while holding left or right. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Tank Controls|Movement", meta = (AllowPrivateAccess = "true", ClampMin = "0.0", Units = "deg/s"))
 	float TurnRate = 95.0f;
+
+	bool bRunInputHeld = false;
 };
