@@ -8,6 +8,7 @@
 #include "Engine/StaticMesh.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
+#include "SurvivorInventoryComponent.h"
 #include "SurvivorInteractionComponent.h"
 #include "UObject/ConstructorHelpers.h"
 
@@ -34,6 +35,8 @@ AClassicTankCharacter::AClassicTankCharacter()
 
 	InteractionComponent = CreateDefaultSubobject<USurvivorInteractionComponent>(
 		TEXT("InteractionComponent"));
+	InventoryComponent = CreateDefaultSubobject<USurvivorInventoryComponent>(
+		TEXT("InventoryComponent"));
 
 	// This engine capsule is only a temporary stand-in. It makes turning and
 	// movement visible in a completely blank project and will be removed when a

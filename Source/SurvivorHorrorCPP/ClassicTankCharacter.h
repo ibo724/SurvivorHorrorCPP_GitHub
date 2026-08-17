@@ -7,6 +7,7 @@
 #include "ClassicTankCharacter.generated.h"
 
 class UStaticMeshComponent;
+class USurvivorInventoryComponent;
 class USurvivorInteractionComponent;
 
 /**
@@ -36,6 +37,10 @@ private:
 	/** Character-facing interaction detection; independent of the room camera. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Interaction", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<USurvivorInteractionComponent> InteractionComponent;
+
+	/** Runtime item storage; its final capacity and UI will be decided later. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<USurvivorInventoryComponent> InventoryComponent;
 
 	/** Temporary visible body so the blank project is testable before character art is imported. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Tank Controls|Preview", meta = (AllowPrivateAccess = "true"))
