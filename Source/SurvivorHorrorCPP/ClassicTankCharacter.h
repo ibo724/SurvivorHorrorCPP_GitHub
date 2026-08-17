@@ -7,6 +7,7 @@
 #include "ClassicTankCharacter.generated.h"
 
 class UStaticMeshComponent;
+class USurvivorInteractionComponent;
 
 /**
  * Old-school survival-horror character movement:
@@ -30,6 +31,11 @@ protected:
 private:
 	void MoveForward(float AxisValue);
 	void Turn(float AxisValue);
+	void Interact();
+
+	/** Character-facing interaction detection; independent of the room camera. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Interaction", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<USurvivorInteractionComponent> InteractionComponent;
 
 	/** Temporary visible body so the blank project is testable before character art is imported. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Tank Controls|Preview", meta = (AllowPrivateAccess = "true"))

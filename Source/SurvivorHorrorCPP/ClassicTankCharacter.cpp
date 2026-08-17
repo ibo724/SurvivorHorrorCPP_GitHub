@@ -8,6 +8,7 @@
 #include "Engine/StaticMesh.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
+#include "SurvivorInteractionComponent.h"
 #include "UObject/ConstructorHelpers.h"
 
 AClassicTankCharacter::AClassicTankCharacter()
@@ -30,6 +31,9 @@ AClassicTankCharacter::AClassicTankCharacter()
 	Movement->BrakingDecelerationWalking = 900.0f;
 	Movement->GroundFriction = 8.0f;
 	Movement->bCanWalkOffLedgesWhenCrouching = false;
+
+	InteractionComponent = CreateDefaultSubobject<USurvivorInteractionComponent>(
+		TEXT("InteractionComponent"));
 
 	// This engine capsule is only a temporary stand-in. It makes turning and
 	// movement visible in a completely blank project and will be removed when a
@@ -56,6 +60,8 @@ void AClassicTankCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
 	check(PlayerInputComponent);
 	PlayerInputComponent->BindAxis(TEXT("MoveForward"), this, &AClassicTankCharacter::MoveForward);
 	PlayerInputComponent->BindAxis(TEXT("Turn"), this, &AClassicTankCharacter::Turn);
+	PlayerInputComponent->BindAction(
+		TEXT("Interact"), IE_Pressed, this, &AClassicTankCharacter::Interact);
 }
 
 void AClassicTankCharacter::MoveForward(const float AxisValue)
@@ -86,5 +92,13 @@ void AClassicTankCharacter::Turn(const float AxisValue)
 	if (Controller)
 	{
 		Controller->SetControlRotation(GetActorRotation());
+	}
+}
+
+void AClassicTankCharacter::Interact()
+{
+	if (InteractionComponent)
+	{
+		InteractionComponent->TryInteract();
 	}
 }
